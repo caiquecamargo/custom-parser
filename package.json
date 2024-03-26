@@ -1,0 +1,29 @@
+{
+  "name": "custom-parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@antfu/eslint-config": "^2.9.0",
+    "@caiquecamargo/utils": "^0.1.5",
+    "@types/nlcst": "^2.0.3",
+    "@types/unist": "^3.0.2",
+    "eslint": "^8.57.0",
+    "rehype": "^13.0.1",
+    "retext": "^9.0.0",
+    "unist-util-visit": "^5.0.0",
+    "vfile": "^6.0.1",
+    "vite": "^5.2.6",
+    "vitest": "^1.4.0"
+  },
+  "dependencies": {
+    "nlcst-to-string": "^4.0.0"
+  }
+}
