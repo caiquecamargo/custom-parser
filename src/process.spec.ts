@@ -3,9 +3,21 @@ import { MarkType, MarkGroup, Marked, ParserConfig } from "./parser";
 import { inChunks } from "@caiquecamargo/utils/core";
 import { process } from "./process";
 
+const translate = (value: string) => {
+  switch (value) {
+    case "personalYearText":
+      return "Texto do ano pessoal";
+    case "anotherValue":
+      return "Outro valor";
+    default:
+      return value;
+  }
+
+}
+
 const config: ParserConfig = {
   marks: [
-    { type: MarkType.Punctuation, open: "{{", close: "}}" },
+    { type: MarkType.Punctuation, open: "{{", close: "}}", replaceText: (content) => translate(content) },
     { type: MarkType.Symbol, open: "**", replace: (open) => open ? "<b>" : "</b>" },
     { type: MarkType.Symbol, open: "*", replace: (open) => open ? "<i>" : "</i>" },
     { type: MarkType.Symbol, open: "***", replace: (open) => open ? "<b><i>" : "</i></b>"},
@@ -47,8 +59,16 @@ describe('process', () => {
       ""
     ],
     [
-      "personalYearText",
+      "Texto do ano pessoal",
       "{{personalYearText}}"
+    ],
+    [
+      "Outro valor",
+      "{{anotherValue}}"
+    ],
+    [
+      "<b>Outro valor</b>",
+      "**{{anotherValue}}**"
     ],
     [
       "<b>bold text</b>",
@@ -69,6 +89,14 @@ describe('process', () => {
     [
       "<span style=\"color:#6f1f1f; and a wider content\">estabelecido </span>",
       "##[[color:#6f1f1f; and a wider content]]estabelecido ##"
+    ],
+    [
+      "É o ano de <b>iniciar</b> novas coisas, onde <i>todo</i> estilo será <span style=\"color:#6f1f1f;\">estabelecido </span>pelo ciclo de nove anos. É a <i>hora de <b>ter</b> iniciativa Outro valor e ser corajoso</i> e determinado. Se <b><i>quiser</i></b> sucesso e felicidade, a <span style=\"color:#6f1f1f;\">pessoa <i>precisa</i> ser <b>criativa</b>, segura, independente</span> e confiar na própria intuição. Deve tomar cuidado com a apatia e procrastinação, ou seja, deixar tudo para depois.",
+      "É o ano de **iniciar** novas coisas, onde *todo* estilo será ##[[color:#6f1f1f;]]estabelecido ##pelo ciclo de nove anos. É a *hora de **ter** iniciativa {{anotherValue}} e ser corajoso* e determinado. Se ***quiser*** sucesso e felicidade, a ##[[color:#6f1f1f;]]pessoa *precisa* ser **criativa**, segura, independente## e confiar na própria intuição. Deve tomar cuidado com a apatia e procrastinação, ou seja, deixar tudo para depois."
+    ],
+    [
+      "É o ano de <b>iniciar Texto do ano pessoal</b> novas coisas, onde <i>todo</i> estilo será <span style=\"color:#6f1f1f;\">estabelecido </span>pelo ciclo de nove anos. É a <i>hora de <b>ter</b> iniciativa Outro valor e ser corajoso</i> e determinado. Se <b><i>quiser</i></b> sucesso e felicidade, a <span style=\"color:#6f1f1f;\">pessoa <i>precisa</i> ser <b>criativa</b>, segura, independente</span> e confiar na própria intuição. Deve tomar cuidado com a apatia e procrastinação, ou seja, deixar tudo para depois.",
+      "É o ano de **iniciar {{personalYearText}}** novas coisas, onde *todo* estilo será ##[[color:#6f1f1f;]]estabelecido ##pelo ciclo de nove anos. É a *hora de **ter** iniciativa {{anotherValue}} e ser corajoso* e determinado. Se ***quiser*** sucesso e felicidade, a ##[[color:#6f1f1f;]]pessoa *precisa* ser **criativa**, segura, independente## e confiar na própria intuição. Deve tomar cuidado com a apatia e procrastinação, ou seja, deixar tudo para depois."
     ],
     [
       "É o ano de <b>iniciar</b> novas coisas, onde <i>todo</i> estilo será <span style=\"color:#6f1f1f;\">estabelecido </span>pelo ciclo de nove anos. É a <i>hora de <b>ter</b> iniciativa e ser corajoso</i> e determinado. Se <b><i>quiser</i></b> sucesso e felicidade, a <span style=\"color:#6f1f1f;\">pessoa <i>precisa</i> ser <b>criativa</b>, segura, independente</span> e confiar na própria intuição. Deve tomar cuidado com a apatia e procrastinação, ou seja, deixar tudo para depois.",

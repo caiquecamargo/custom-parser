@@ -24,6 +24,7 @@ export interface Mark {
   content?: Mark;
   transform?: (node: Marked) => Marked[];
   replace?: (open: boolean, content: string) => string;
+  replaceText?: (content: string) => string;
 }
 
 export interface ParserConfig {
