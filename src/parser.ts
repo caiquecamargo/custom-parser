@@ -23,9 +23,10 @@ export interface Mark {
   close?: string;
   content?: Mark;
   transform?: (node: Marked) => Marked[];
+  replace?: (open: boolean, content: string) => string;
 }
 
-interface ParserConfig {
+export interface ParserConfig {
   marks: Mark[];
   resolveConflicts?: (rest: Marked[]) => MarkGroup[];
 }
@@ -40,12 +41,12 @@ export interface Marked {
   value: string;
 };
 
-interface ParserResponse { 
+export interface ParserResponse { 
   open: string;
   close: string;
   start: [init: number, end: number];
   end: [init: number, end: number];
-  content?: ParserResponse[];
+  content?: ParserResponse;
   mark: Mark;
 };
 
@@ -96,7 +97,7 @@ const resolveContent = (input: string, groups: ParserResponse[]) => {
 
     const start = group.start[0] + group.open.length;
     const [end] = group.end;
-    group.content = parse(input.slice(start, end), { marks: [group.mark.content] });
+    group.content = parse(input.slice(start, end), { marks: [group.mark.content] })[0];
   })
 }
 

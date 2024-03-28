@@ -1,6 +1,38 @@
 import { describe, expect, it } from "vitest";
-import { parse, MarkType, MarkGroup, Marked } from "./parser";
+import { parse, MarkType, MarkGroup, Marked, ParserConfig } from "./parser";
 import { inChunks } from "@caiquecamargo/utils/core";
+
+const config: ParserConfig = {
+  marks: [
+    { type: MarkType.Punctuation, open: "{{", close: "}}" },
+    { type: MarkType.Symbol, open: "**" },
+    { type: MarkType.Symbol, open: "*" },
+    { type: MarkType.Symbol, open: "***" },
+    { type: MarkType.Symbol, open: "##", content: { type: MarkType.Punctuation, open: "[[", close: "]]" }, },
+  ],
+  resolveConflicts: (rest) => {
+    const groups: MarkGroup[] = [];
+    for (const [first, second, third] of inChunks(rest, 3)) {
+      if (!first || !second || !third) continue;
+      if (new Set([first, second, third].map(a => a.value)).size !== 3) continue;
+
+      const bold = [first, second, third].find(a => a.mark.open === "**") as Marked;
+      const italic = [first, second, third].find(a => a.mark.open === "*") as Marked;
+      const boldItalic = [first, second, third].find(a => a.mark.open === "***") as Marked;
+
+      const union: Marked = {
+        start: bold?.start ?? 0,
+        end: italic?.end ?? 0,
+        value: "***",
+        mark: { type: MarkType.Symbol, open: "***" },
+      }
+
+      groups.push(union.start < boldItalic?.start ? [union, boldItalic] : [boldItalic, union])
+    }
+
+    return groups;
+  }
+}
 
 describe('parser', () => {
   it.each([
@@ -42,9 +74,8 @@ describe('parser', () => {
       [
         { open: "##", close: "##", start: [0, 2], end: [53, 55],
           mark: { type: MarkType.Symbol, open: "##", content: { type: MarkType.Punctuation, open: "[[", close: "]]" }},
-          content: [
+          content:
             { open: "[[", close: "]]", start: [0, 2], end: [36, 38], mark: { open: "[[", close: "]]", type: MarkType.Punctuation }}
-          ]
         },
       ],
       "##[[color:#6f1f1f; and a wider content]]estabelecido ##"
@@ -55,9 +86,8 @@ describe('parser', () => {
         { open: "*", close: "*", start: [42, 43], end: [47, 48], mark: { open: "*", type: MarkType.Symbol }},
         { open: "##", close: "##", start: [61, 63], end: [94, 96],
           mark: { type: MarkType.Symbol, open: "##", content: { type: MarkType.Punctuation, open: "[[", close: "]]" }},
-          content: [
+          content:
             { open: "[[", close: "]]", start: [0, 2], end: [16, 18], mark: { open: "[[", close: "]]", type: MarkType.Punctuation }}
-          ]
         },
         { open: "**", close: "**", start: [134, 136], end: [139, 141], mark: { open: "**", type: MarkType.Symbol }},
         { open: "*", close: "*", start: [125, 126], end: [167, 168], mark: { open: "*", type: MarkType.Symbol }},
@@ -66,9 +96,8 @@ describe('parser', () => {
         { open: "**", close: "**", start: [265, 267], end: [275, 277], mark: { open: "**", type: MarkType.Symbol }},
         { open: "##", close: "##", start: [224, 226], end: [299, 301],
           mark: { type: MarkType.Symbol, open: "##", content: { type: MarkType.Punctuation, open: "[[", close: "]]" }},
-          content: [
+          content:
             { open: "[[", close: "]]", start: [0, 2], end: [16, 18], mark: { open: "[[", close: "]]", type: MarkType.Punctuation }}
-          ]
         },
       ],
       "É o ano de **iniciar** novas coisas, onde *todo* estilo será ##[[color:#6f1f1f;]]estabelecido ##pelo ciclo de nove anos. É a *hora de **ter** iniciativa e ser corajoso* e determinado. Se ***quiser*** sucesso e felicidade, a ##[[color:#6f1f1f;]]pessoa *precisa* ser **criativa**, segura, independente## e confiar na própria intuição. Deve tomar cuidado com a apatia e procrastinação, ou seja, deixar tudo para depois."
@@ -81,45 +110,14 @@ describe('parser', () => {
         { open: "**", close: "**", start: [29, 31], end: [72, 74], mark: { open: "**", type: MarkType.Symbol }},
         { open: "##", close: "##", start: [80, 82], end: [113, 115], 
           mark: { type: MarkType.Symbol, open: "##", content: { type: MarkType.Punctuation, open: "[[", close: "]]" }},
-          content: [
+          content:
             { open: "[[", close: "]]", start: [0, 2], end: [16, 18], mark: { open: "[[", close: "]]", type: MarkType.Punctuation }}
-          ]
         },
       ],
       "É o ano de **iniciar** novas **coisas, onde *todo **novo** doido* estilo** será ##[[color:#6f1f1f;]]estabelecido ##"
     ],
-  ])('should process input', async (html, text) => {
-    const processed = parse(text, {
-      marks: [
-        { type: MarkType.Punctuation, open: "{{", close: "}}" },
-        { type: MarkType.Symbol, open: "**" },
-        { type: MarkType.Symbol, open: "*" },
-        { type: MarkType.Symbol, open: "***" },
-        { type: MarkType.Symbol, open: "##", content: { type: MarkType.Punctuation, open: "[[", close: "]]" } },
-      ],
-      resolveConflicts: (rest) => {
-        const groups: MarkGroup[] = [];
-        for (const [first, second, third] of inChunks(rest, 3)) {
-          if (!first || !second || !third) continue;
-          if (new Set([first, second, third].map(a => a.value)).size !== 3) continue;
-
-          const bold = [first, second, third].find(a => a.mark.open === "**") as Marked;
-          const italic = [first, second, third].find(a => a.mark.open === "*") as Marked;
-          const boldItalic = [first, second, third].find(a => a.mark.open === "***") as Marked;
-
-          const union: Marked = {
-            start: bold?.start ?? 0,
-            end: italic?.end ?? 0,
-            value: "***",
-            mark: { type: MarkType.Symbol, open: "***" },
-          }
-
-          groups.push(union.start < boldItalic?.start ? [union, boldItalic] : [boldItalic, union])
-        }
-
-        return groups;
-      }
-    });
-    expect(processed).toEqual(html);
+  ])('should process input', async (expected, text) => {
+    const processed = parse(text, config);
+    expect(processed).toEqual(expected);
   })
 });
