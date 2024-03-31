@@ -1,27 +1,30 @@
 {
   "name": "@caiquecamargo/custom-parser",
-  "version": "0.0.1",
-  "description": "",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
   "type": "module",
+  "version": "0.0.2",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caiquecamargo/custom-parser.git"
+  },
+  "keywords": [],
   "exports": {
     ".": {
-      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.js"
     }
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "files": [
     "dist"
   ],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/caiquecamargo/custom-parser.git"
   },
   "scripts": {
     "test": "vitest",
@@ -31,9 +34,10 @@
     "prepublishOnly": "pnpm package",
     "pub": "pnpm publish"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "peerDependencies": {
+    "rehype": "^13.0.1",
+    "retext": "^9.0.0"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^2.9.0",
     "@caiquecamargo/utils": "^0.1.5",
@@ -48,9 +52,5 @@
     "vfile": "^6.0.1",
     "vite": "^5.2.6",
     "vitest": "^1.4.0"
-  },
-  "peerDependencies": {
-    "rehype": "^13.0.1",
-    "retext": "^9.0.0"
   }
 }
