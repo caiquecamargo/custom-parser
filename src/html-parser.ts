@@ -12,22 +12,7 @@ export interface HTMLParserConfig {
   marks: HTMLMark[];
 }
 
-// const unprocessElement = (element: ElementKey, input: string, node: Node) => {
-//   switch (element) {
-//     case "b":
-//       return `**${input}**`;
-//     case "i":
-//       return `*${input}*`;
-//     case "font":
-//       return `##[[${StyleParser.fromHTMLStyle(node.properties.style)}]]${input}##`;
-//     case "mark":
-//       return `{{${node.properties.dataProccess}}}`;
-//     default:
-//       return input;
-//   }
-// }
-
-const unrun = (node: Element | Comment, input: string, marks: HTMLMark[]) => {
+const unrun = (node: Element | Comment, input: string, marks: HTMLMark[]): string => {
   if (node.type === "comment") return "";
 
   return node.children.map((child) => {
