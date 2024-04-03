@@ -1,7 +1,6 @@
 import type { Comment, Element, Root } from 'hast';
 import { rehype } from 'rehype';
 import type { VFile } from 'vfile';
-import type { ParserResponse } from './parser';
 
 export interface HTMLMark {
   tagName: string;
