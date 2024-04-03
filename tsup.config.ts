@@ -5,7 +5,7 @@ export default defineConfig((options) => {
     entry: ['index.ts'],
     format: options.format,
     clean: options.format?.includes('cjs'),
-    dts: options.format?.includes('esm'),
+    dts: true,
     sourcemap: options.format?.includes('esm'),
     minify: options.format?.includes('cjs'),
     ignoreWatch: ['demo/**/*'],
