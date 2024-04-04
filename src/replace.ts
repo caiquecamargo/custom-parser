@@ -49,7 +49,7 @@ export function replace(text: string, markeds: ParserResponse[]) {
   return result + text.slice(cursor);
 }
 
-export function* replaceIterator(text: string, markeds: ParserResponse[]): Generator<[init: number, end: number, content: string, ctx: ParserResponse], string, unknown> {
+export function* replaceIterator(text: string, markeds: ParserResponse[]): Generator<[init: number, end: number, originalInit: number, ctx: ParserResponse], string, unknown> {
   const tokens = markeds
     .flatMap((marked) => {
       const { start, end, mark, content } = marked;
@@ -75,20 +75,20 @@ export function* replaceIterator(text: string, markeds: ParserResponse[]): Gener
     cursor = resolvedEnd;
 
     if (token.open)
-      token.marked.start = [result.length, token.marked.start[1]];
-    else token.marked.end = [result.length - replaced.length, token.marked.end[1]];
+      token.marked.start = [result.length, token.marked.start[0]];
+    else token.marked.end = [result.length - replaced.length, 0];
   }
 
   let compensate = 0;
 
   for (const marked of markeds) {
     const [init, originalInit] = marked.start;
-    const [end, originalEnd] = marked.end;
+    const [end] = marked.end;
 
     const content = result.slice(init + compensate, end + compensate);
     const replaced = marked.mark.replaceText ? marked.mark.replaceText(content) : content;
 
-    yield [originalInit, originalEnd, content, marked];
+    yield [init, end, originalInit, marked];
 
     result = result.slice(0, init + compensate) + replaced + result.slice(end + compensate);
     compensate += replaced.length - content.length;
