@@ -75,20 +75,20 @@ export function* replaceIterator(text: string, markeds: ParserResponse[]): Gener
     cursor = resolvedEnd;
 
     if (token.open)
-      token.marked.start = [result.length, 0];
-    else token.marked.end = [result.length - replaced.length, 0];
+      token.marked.start = [result.length, token.marked.start[1]];
+    else token.marked.end = [result.length - replaced.length, token.marked.end[1]];
   }
 
   let compensate = 0;
 
   for (const marked of markeds) {
-    const [init] = marked.start;
-    const [end] = marked.end;
+    const [init, originalInit] = marked.start;
+    const [end, originalEnd] = marked.end;
 
     const content = result.slice(init + compensate, end + compensate);
     const replaced = marked.mark.replaceText ? marked.mark.replaceText(content) : content;
 
-    yield [init, end, content, marked];
+    yield [originalInit, originalEnd, content, marked];
 
     result = result.slice(0, init + compensate) + replaced + result.slice(end + compensate);
     compensate += replaced.length - content.length;
